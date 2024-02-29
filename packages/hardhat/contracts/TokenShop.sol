@@ -75,7 +75,7 @@ contract RWF_Trust is ERC20, ERC20Permit, AccessControl {
     function buy() public payable {
         uint256 tokenAmount = msg.value * ethExchangeValue() / (price * 10**18);
         require(tokenAmount > 0, "Insufficient ETH amount to buy a single token");
-        require(tokenAmount + balanceOf(msg.sender) > minOwnedTokens,
+        require(tokenAmount + balanceOf(msg.sender) >= minOwnedTokens,
             "Insufficient ETH amount to buy the minimum amount of tokens");
         uint256 remainingTokens = maxTokens - totalSupply();
         require(tokenAmount <= remainingTokens, "Insufficient tokens available, send less ETH");
