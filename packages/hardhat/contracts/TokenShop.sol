@@ -25,7 +25,7 @@ contract RWF_Trust is ERC20, ERC20Permit, AccessControl {
         string  memory _symbol,
         uint256 _maxTokens,
         uint256 _price,
-        uint32  _dueDate,
+        uint256 _dueDate,
         uint256 _expectedROI,
         uint256 _earlyWithdrawPenalty,
         uint256 _pctCashReserve,
@@ -50,7 +50,7 @@ contract RWF_Trust is ERC20, ERC20Permit, AccessControl {
         profitPct = _profitPct;
     } //end of constructor
 
-    function decimals() public view override pure returns (uint8) {
+    function decimals() public pure override returns (uint8) {
         return 0;
     }
 
@@ -63,7 +63,7 @@ contract RWF_Trust is ERC20, ERC20Permit, AccessControl {
         return price;
     }
 
-    function getDueDate() public view returns (uint32) {
+    function getDueDate() public view returns (uint256) {
         return dueDate;
     }
 
@@ -105,4 +105,5 @@ contract RWF_Trust is ERC20, ERC20Permit, AccessControl {
         _burn(msg.sender, tokenAmount);
         payable(msg.sender).transfer(ethAmount);
     }
+
 }
