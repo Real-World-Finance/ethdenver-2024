@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 
 /* 
 Line to Deploy in Remix:
-BufficornCastle,BCC,500000,1000000000000000000,1709420650,15000000000000000000,10000000000000000000,20000000000000000000,https://remote-image.decentralized-content.com/image?url=https%3A%2F%2Fprod-metadata.s3.amazonaws.com%2Fimages%2F7553.png&w=1080&q=75,0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C,15000000000000000000
+BufficornCastle,BCC,500000,1000000000000000000,1709420650,15000000000000000000,10000000000000000000,20000000000000000000,https://remote-image.decentralized-content.com/image?url=https%3A%2F%2Fprod-metadata.s3.amazonaws.com%2Fimages%2F7553.png&w=1080&q=75,0x5B38Da6a701c568545dCfcB03FcB875f56beddC4,15000000000000000000
 2024-03-02 16:04:10 -> This is the TimeStamp for the deploy test string
 */
 
@@ -66,6 +66,10 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         return price;
     }
 
+    function setDueDate() public onlyOwner view returns (uint256) {
+        return dueDate;
+    }
+
     function getDueDate() public view returns (uint256) {
         return dueDate;
     }
@@ -102,8 +106,11 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         if (block.timestamp < dueDate) {
             penalty = tokenAmount * price * earlyWithdrawPenalty / (100 * 10**18);
         }
-        //FIXME verificar qué pasa cuando profit es negativo. Si trunca en 0 o que pasa
-        uint256 profit = (price - initialPrice) * tokenAmount;
+        
+        uint256 profit = 0;
+        if (price > initialPrice) {
+            profit = (price - initialPrice) * tokenAmount;
+        }
         uint256 platformProfit = profit * profitPct / (100 * 10**18);
         uint256 amountUSD = tokenAmount * price - penalty - platformProfit;
         uint256 ethAmount =  amountUSD * 10**18 / ethExchangeValue();
@@ -118,9 +125,11 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
     }
 
     // FIXME this function should require to be executed after due date
-    function investmentExecution() public onlyOwner {
+    function investmentExecution() public payable onlyOwner {
         uint256 netPaymentETH = totalSupply() * price * 10**18 / ethExchangeValue();
         uint256 totalPaymentETH = (100 * 10**18 - profitPct) * netPaymentETH / (100 * 10**18);
+        require(block.timestamp > dueDate, 
+            "You need to wait until the due date to excecute this function");
         require(address(this).balance >= totalPaymentETH,
             "Not enough funds to execute investment returns");
         
