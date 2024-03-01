@@ -2,6 +2,12 @@
 // Compatible with OpenZeppelin Contracts ^5.0.0
 pragma solidity ^0.8.24;
 
+/* 
+Line to Deploy in Remix:
+BuffiCornCastle,BCC,500000,1000000000000000000,1709420650,15000000000000000000,10000000000000000000,20000000000000000000,https://remote-image.decentralized-content.com/image?url=https%3A%2F%2Fprod-metadata.s3.amazonaws.com%2Fimages%2F7553.png&w=1080&q=75,0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB,15000000000000000000
+2024-03-02 16:04:10 -> This is the TimeStamp for the deploy test string
+*/
+
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -37,7 +43,6 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         ERC20Permit(_name)
         Ownable(_trust)
     {
-        //FIXME: check invariants
         maxTokens = _maxTokens;
         initialPrice = _price;
         setPrice(_price);
@@ -81,7 +86,7 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
 
         _mint(msg.sender, tokenAmount);
 
-        payable(owner()).transfer( (100**18 - pctCashReserve) * msg.value / (100**18 * 1**18) );
+        payable(owner()).transfer( (100 * 10**18 - pctCashReserve) * msg.value / (100 * 10**18) );
 
         uint256 excessAmount = msg.value - (tokenAmount * price / ethExchangeValue()) * 10**18;
         if (excessAmount > 0) {
@@ -95,12 +100,12 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
 
         uint256 penalty = 0;
         if (block.timestamp < dueDate) {
-            penalty = tokenAmount * price * earlyWithdrawPenalty / (100**18 * 1**18);
+            penalty = tokenAmount * price * earlyWithdrawPenalty / (100 * 10**18);
         }
         uint256 profit = (price - initialPrice) * tokenAmount;
-        uint256 platformProfit = profit * profitPct / (100**18 * 1**18);
+        uint256 platformProfit = profit * profitPct / (100 * 10**18);
         uint256 amountUSD = tokenAmount * price - penalty - platformProfit;
-        uint256 ethAmount =  amountUSD * 1 ** 18 / ethExchangeValue();
+        uint256 ethAmount =  amountUSD * 10**18 / ethExchangeValue();
         require(ethAmount > 0, "There's nothing left for you my friend, better luck next time");
         _burn(seller, tokenAmount);
         payable(seller).transfer(ethAmount);
@@ -110,9 +115,10 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         _sell(msg.sender, tokenAmount);
     }
 
+    // FIXME this function should require to be executed after due date
     function investmentExecution() public onlyOwner {
-        uint256 netPaymentETH = totalSupply() * price * 1**18 / ethExchangeValue();
-        uint256 totalPaymentETH = (100**18 - profitPct) * netPaymentETH / (100**18 * 1**18);
+        uint256 netPaymentETH = totalSupply() * price * 10**18 / ethExchangeValue();
+        uint256 totalPaymentETH = (100 * 10**18 - profitPct) * netPaymentETH / (100 * 10**18);
         require(address(this).balance >= totalPaymentETH,
             "Not enough funds to execute investment returns");
         
