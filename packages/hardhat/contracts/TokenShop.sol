@@ -19,6 +19,7 @@ contract RWF_Trust is ERC20, ERC20Permit, AccessControl {
     address private trust;
     uint256 private profitPct; //in 10**18
     uint256 private minOwnedTokens = 20;
+    address[] private beneficiaries;
 
     constructor(
         string  memory _name,
@@ -79,6 +80,7 @@ contract RWF_Trust is ERC20, ERC20Permit, AccessControl {
             "Insufficient ETH amount to buy the minimum amount of tokens");
         uint256 remainingTokens = maxTokens - totalSupply();
         require(tokenAmount <= remainingTokens, "Insufficient tokens available, send less ETH");
+        require(block.timestamp < dueDate, "Fund has been terminated");
 
         _mint(msg.sender, tokenAmount);
 
@@ -110,5 +112,30 @@ contract RWF_Trust is ERC20, ERC20Permit, AccessControl {
     function sell(uint256 tokenAmount) public {
         _sell(msg.sender, tokenAmount);
     }
+
+    function investmentExecution() public {
+        uint256 netPaymentETH = totalSupply() * price * 1**18 / ethExchangeValue();
+        uint256 totalPaymentETH = (100**18 - profitPct) * netPaymentETH / (100**18 * 1**18);
+        require(address(this).balance >= totalPaymentETH,
+            "Not enough funds to execute investment returns");
+        for (uint32 i = 0; i != beneficiaries.length; i++) {
+            address beneficiary = beneficiaries[i];
+            if (balanceOf(beneficiary) == 0) {
+                continue;
+            }
+            _sell(beneficiary, balanceOf(beneficiary));
+        }
+    }
+
+    function _update(address from, address to, uint256 value) internal virtual override {
+        bool toExisted = balanceOf(to) > 0;
+        super._update(from, to, value);
+        bool toExists = balanceOf(to) > 0;
+        if (!toExisted && toExists) {
+            beneficiaries.push(to);
+        }
+    }
+
+    //FIXME: withDraw for ourselves
 
 }
