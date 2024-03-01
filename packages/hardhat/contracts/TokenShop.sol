@@ -127,7 +127,6 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         _sell(payable(msg.sender), tokenAmount);
     }
 
-    // FIXME this function should require to be executed after due date
     function investmentExecution() public payable onlyOwner {
         uint256 netPaymentETH = totalSupply() * price * 10**18 / ethExchangeValue();
         uint256 totalPaymentETH = (100 * 10**18 - profitPct) * netPaymentETH / (100 * 10**18);
