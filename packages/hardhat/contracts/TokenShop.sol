@@ -134,6 +134,8 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         }
     }
 
-    //FIXME: withDraw for ourselves
-
+    function withdraw(address payable recipient, uint256 amount) public onlyOwner {
+        require(address(this).balance >= amount, "Insufficient funds");
+        recipient.transfer(amount);
+    }
 }
