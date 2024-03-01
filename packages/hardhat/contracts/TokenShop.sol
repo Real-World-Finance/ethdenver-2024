@@ -90,9 +90,9 @@ contract RWF_Trust is ERC20, ERC20Permit, AccessControl {
         }
     }
 
-    function sell(uint256 tokenAmount) public {
+    function _sell(address seller, uint256 tokenAmount) private {
         require(tokenAmount > 0, "Invalid token amount");
-        require(balanceOf(msg.sender) >= tokenAmount, "Insufficient tokens in your balance");
+        require(balanceOf(seller) >= tokenAmount, "Insufficient tokens in your balance");
 
         uint256 penalty = 0;
         if (block.timestamp < dueDate) {
@@ -103,8 +103,12 @@ contract RWF_Trust is ERC20, ERC20Permit, AccessControl {
         uint256 amountUSD = tokenAmount * price - penalty - platformProfit;
         uint256 ethAmount =  amountUSD * 1 ** 18 / ethExchangeValue();
         require(ethAmount > 0, "There's nothing left for you my friend, better luck next time");
-        _burn(msg.sender, tokenAmount);
-        payable(msg.sender).transfer(ethAmount);
+        _burn(seller, tokenAmount);
+        payable(seller).transfer(ethAmount);
+    }
+
+    function sell(uint256 tokenAmount) public {
+        _sell(msg.sender, tokenAmount);
     }
 
 }
