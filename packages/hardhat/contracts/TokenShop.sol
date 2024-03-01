@@ -4,9 +4,9 @@ pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract RWF_Trust is ERC20, ERC20Permit, AccessControl {
+contract RWF_Trust is ERC20, ERC20Permit, Ownable {
 
     uint256 private maxTokens;
     uint256 private initialPrice; //in 10**18 USD
@@ -16,7 +16,6 @@ contract RWF_Trust is ERC20, ERC20Permit, AccessControl {
     uint256 private earlyWithdrawPenalty; //in 10**18 USD
     uint256 private pctCashReserve; //in 10**18
     string  private imageURL;
-    address private trust;
     uint256 private profitPct; //in 10**18
     uint256 private minOwnedTokens = 20;
     address[] private beneficiaries;
@@ -36,6 +35,7 @@ contract RWF_Trust is ERC20, ERC20Permit, AccessControl {
     )
         ERC20(_name, _symbol)
         ERC20Permit(_name)
+        Ownable(_trust)
     {
         //FIXME: check invariants
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -47,7 +47,6 @@ contract RWF_Trust is ERC20, ERC20Permit, AccessControl {
         earlyWithdrawPenalty = _earlyWithdrawPenalty;
         pctCashReserve = _pctCashReserve;
         imageURL = _imageURL;
-        trust = _trust;
         profitPct = _profitPct;
     } //end of constructor
 
@@ -55,9 +54,8 @@ contract RWF_Trust is ERC20, ERC20Permit, AccessControl {
         return 0;
     }
 
-    function setPrice(uint256 newPrice) public {
+    function setPrice(uint256 newPrice) public onlyOwner {
         price = newPrice;
-        //FIXME: add ownership check, only the Trust can change it.
     }
 
     function getPrice() public view returns (uint256) {
@@ -84,7 +82,7 @@ contract RWF_Trust is ERC20, ERC20Permit, AccessControl {
 
         _mint(msg.sender, tokenAmount);
 
-        payable(trust).transfer( (100**18 - pctCashReserve) * msg.value / (100**18 * 1**18) );
+        payable(owner()).transfer( (100**18 - pctCashReserve) * msg.value / (100**18 * 1**18) );
 
         uint256 excessAmount = msg.value - (tokenAmount * price / ethExchangeValue()) * 10**18;
         if (excessAmount > 0) {
@@ -113,11 +111,12 @@ contract RWF_Trust is ERC20, ERC20Permit, AccessControl {
         _sell(msg.sender, tokenAmount);
     }
 
-    function investmentExecution() public {
+    function investmentExecution() public onlyOwner {
         uint256 netPaymentETH = totalSupply() * price * 1**18 / ethExchangeValue();
         uint256 totalPaymentETH = (100**18 - profitPct) * netPaymentETH / (100**18 * 1**18);
         require(address(this).balance >= totalPaymentETH,
             "Not enough funds to execute investment returns");
+        
         for (uint32 i = 0; i != beneficiaries.length; i++) {
             address beneficiary = beneficiaries[i];
             if (balanceOf(beneficiary) == 0) {
