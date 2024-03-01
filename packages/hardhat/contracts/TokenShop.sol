@@ -25,10 +25,12 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
     uint256 private profitPct; //in 10**18
     uint256 private minOwnedTokens = 20;
     address[] private beneficiaries;
+    string private description;
 
     constructor(
         string  memory _name,
         string  memory _symbol,
+        string memory _description,
         uint256 _maxTokens,
         uint256 _price,
         uint256 _dueDate,
@@ -52,6 +54,7 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         pctCashReserve = _pctCashReserve;
         imageURL = _imageURL;
         profitPct = _profitPct;
+        description = _description;
     } //end of constructor
 
     function decimals() public pure override returns (uint8) {
@@ -66,8 +69,8 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         return price;
     }
 
-    function setDueDate() public onlyOwner view returns (uint256) {
-        return dueDate;
+    function setDueDate(uint256 _dueDate) public onlyOwner returns (uint256) {
+        dueDate = _dueDate;
     }
 
     function getDueDate() public view returns (uint256) {
@@ -154,5 +157,13 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
     function withdraw(uint256 amount) public onlyOwner {
         require(address(this).balance >= amount, "Insufficient funds");
         payable(owner()).transfer(amount);
+    }
+
+    function setDescription(string _description) public onlyOwner {
+        description = _description;
+    }
+
+    function getDescription() public view returns (string) {
+        return description;
     }
 }
