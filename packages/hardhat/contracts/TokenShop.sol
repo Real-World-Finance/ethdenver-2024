@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 
 /* 
 Line to Deploy in Remix:
-BuffiCornCastle,BCC,500000,1000000000000000000,1709420650,15000000000000000000,10000000000000000000,20000000000000000000,https://remote-image.decentralized-content.com/image?url=https%3A%2F%2Fprod-metadata.s3.amazonaws.com%2Fimages%2F7553.png&w=1080&q=75,0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB,15000000000000000000
+BufficornCastle,BCC,500000,1000000000000000000,1709420650,15000000000000000000,10000000000000000000,20000000000000000000,https://remote-image.decentralized-content.com/image?url=https%3A%2F%2Fprod-metadata.s3.amazonaws.com%2Fimages%2F7553.png&w=1080&q=75,0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C,15000000000000000000
 2024-03-02 16:04:10 -> This is the TimeStamp for the deploy test string
 */
 
@@ -88,13 +88,13 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
 
         payable(owner()).transfer( (100 * 10**18 - pctCashReserve) * msg.value / (100 * 10**18) );
 
-        uint256 excessAmount = msg.value - (tokenAmount * price / ethExchangeValue()) * 10**18;
+        uint256 excessAmount = msg.value - (tokenAmount * price * 10**18 / ethExchangeValue());
         if (excessAmount > 0) {
             payable(msg.sender).transfer(excessAmount);
         }
     }
 
-    function _sell(address seller, uint256 tokenAmount) private {
+    function _sell(address payable seller, uint256 tokenAmount) private {
         require(tokenAmount > 0, "Invalid token amount");
         require(balanceOf(seller) >= tokenAmount, "Insufficient tokens in your balance");
 
@@ -102,17 +102,19 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         if (block.timestamp < dueDate) {
             penalty = tokenAmount * price * earlyWithdrawPenalty / (100 * 10**18);
         }
+        //FIXME verificar qué pasa cuando profit es negativo. Si trunca en 0 o que pasa
         uint256 profit = (price - initialPrice) * tokenAmount;
         uint256 platformProfit = profit * profitPct / (100 * 10**18);
         uint256 amountUSD = tokenAmount * price - penalty - platformProfit;
         uint256 ethAmount =  amountUSD * 10**18 / ethExchangeValue();
+        require (address(this).balance >= ethAmount, "There's not enough funds in the contract to pay the beneficiary");
         require(ethAmount > 0, "There's nothing left for you my friend, better luck next time");
         _burn(seller, tokenAmount);
         payable(seller).transfer(ethAmount);
     }
 
     function sell(uint256 tokenAmount) public {
-        _sell(msg.sender, tokenAmount);
+        _sell(payable(msg.sender), tokenAmount);
     }
 
     // FIXME this function should require to be executed after due date
@@ -123,7 +125,7 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
             "Not enough funds to execute investment returns");
         
         for (uint32 i = 0; i != beneficiaries.length; i++) {
-            address beneficiary = beneficiaries[i];
+            address payable beneficiary = payable(beneficiaries[i]);
             if (balanceOf(beneficiary) == 0) {
                 continue;
             }
