@@ -82,11 +82,12 @@ contract RWF_Trust is ERC20, ERC20Permit, AccessControl {
 
         _mint(msg.sender, tokenAmount);
 
+        payable(trust).transfer( (100**18 - pctCashReserve) * msg.value / (100**18 * 1**18) );
+
         uint256 excessAmount = msg.value - (tokenAmount * price / ethExchangeValue()) * 10**18;
         if (excessAmount > 0) {
             payable(msg.sender).transfer(excessAmount);
         }
-        //FIXME: should send to the trust or they will just withraw from time to time?
     }
 
     function sell(uint256 tokenAmount) public {
