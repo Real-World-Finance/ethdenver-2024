@@ -38,7 +38,6 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         Ownable(_trust)
     {
         //FIXME: check invariants
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         maxTokens = _maxTokens;
         initialPrice = _price;
         setPrice(_price);
