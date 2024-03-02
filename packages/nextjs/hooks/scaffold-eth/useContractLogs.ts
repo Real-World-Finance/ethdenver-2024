@@ -7,6 +7,7 @@ export const useContractLogs = (address: Address) => {
   const client = usePublicClient();
 
   useEffect(() => {
+    if (!client) return; //FIXME:
     const fetchLogs = async () => {
       try {
         const existingLogs = await client.getLogs({

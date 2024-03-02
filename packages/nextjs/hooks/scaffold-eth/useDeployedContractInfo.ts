@@ -21,6 +21,7 @@ export const useDeployedContractInfo = <TContractName extends ContractName>(cont
         setStatus(ContractCodeStatus.NOT_FOUND);
         return;
       }
+      if (!publicClient) return; //FIXME:
       const code = await publicClient.getBytecode({
         address: deployedContract.address,
       });
