@@ -36,7 +36,6 @@ contract TokenFactory is Ownable {
         string memory  symbol,
         uint256 maxTokens,
         uint256 initialPrice, //in 10**18 USD
-        uint256 price, //in 10**18 USD
         uint256 dueDate, //UTC Unix Timestamp
         uint256 expectedROI, //in 10**18
         uint256 earlyWithdrawPenalty, //in 10**18 USD
