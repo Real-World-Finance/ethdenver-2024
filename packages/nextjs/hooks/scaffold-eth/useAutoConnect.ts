@@ -21,10 +21,10 @@ const SAFE_ID = "safe";
 const getInitialConnector = (
   initialNetwork: Chain,
   previousWalletId: string,
-  connectors: Connector[],
+  connectors: readonly Connector[],
 ): { connector: Connector | undefined; chainId?: number } | undefined => {
   // Look for the SAFE connector instance and connect to it instantly if loaded in SAFE frame
-  const safeConnectorInstance = connectors.find(connector => connector.id === SAFE_ID && connector.ready);
+  const safeConnectorInstance = connectors.find(connector => connector.id === SAFE_ID /*FIXME: && connector.ready*/);
 
   if (safeConnectorInstance) {
     return { connector: safeConnectorInstance };
@@ -58,16 +58,18 @@ const getInitialConnector = (
  */
 export const useAutoConnect = (): void => {
   const wagmiWalletValue = useReadLocalStorage<string>(WAGMI_WALLET_STORAGE_KEY);
-  const [walletId, setWalletId] = useLocalStorage<string>(SCAFFOLD_WALLET_STORAGE_KEY, wagmiWalletValue ?? "");
+  const [walletId, setWalletId] = useLocalStorage<string>(SCAFFOLD_WALLET_STORAGE_KEY, wagmiWalletValue ?? ""/*FIXME: , {
+    initializeWithValue: false,
+  }*/);
   const connectState = useConnect();
   useAccount({
-    onConnect({ connector }) {
+    /*FIXME: onConnect({ connector }) {
       setWalletId(connector?.id ?? "");
-    },
-    onDisconnect() {
+    },*/
+    /*onDisconnect() {
       window.localStorage.setItem(WAGMI_WALLET_STORAGE_KEY, JSON.stringify(""));
       setWalletId("");
-    },
+    },*/
   });
 
   useEffectOnce(() => {
