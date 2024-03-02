@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 
 /* 
 Line to Deploy in Remix:
-BufficornCastle,BCC,500000,1000000000000000000,1709420650,15000000000000000000,10000000000000000000,20000000000000000000,0x5B38Da6a701c568545dCfcB03FcB875f56beddC4,15000000000000000000,description
+BufficornCastle,BCC,500000,1000000000000000000,1709420650,15000000000000000000,10000000000000000000,20000000000000000000,0x5B38Da6a701c568545dCfcB03FcB875f56beddC4,15000000000000000000
 2024-03-02 16:04:10 -> This is the TimeStamp for the deploy test string
 */
 
@@ -24,9 +24,8 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
     uint256 private profitPct; //in 10**18
     uint256 private minOwnedTokens = 20;
     address[] private beneficiaries;
-    string private description;
     address private nftContractAddress;
-    string private imgURL;
+    string private imgUrl;
 
     constructor(
         string  memory _name,
@@ -38,8 +37,8 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         uint256 _earlyWithdrawPenalty,
         uint256 _pctCashReserve,
         address _trust,
-        uint256 _profitPct,
-        string memory _description
+        string memory _imgUrl,
+        uint256 _profitPct
     )
         ERC20(_name, _symbol)
         ERC20Permit(_name)
@@ -52,9 +51,8 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         expectedROI = _expectedROI;
         earlyWithdrawPenalty = _earlyWithdrawPenalty;
         pctCashReserve = _pctCashReserve;
-        profitPct = _profitPct;
-        description = _description;
-        
+        profitPct = _profitPct;        
+        imgUrl = _imgUrl;
     } //end of constructor
 
     function decimals() public pure override returns (uint8) {
@@ -86,11 +84,11 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
     }
     
     function setImgUrl(string memory _imgUrl) public onlyOwner {
-        imgURL = _imgUrl;
+        imgUrl = _imgUrl;
     }
 
     function getImgUrl() public view returns (string memory) {
-        return imgURL;
+        return imgUrl;
     }    
 
     function ethExchangeValue() private pure returns (uint256) {
@@ -178,13 +176,5 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
     function withdraw(uint256 amount) public onlyOwner {
         require(address(this).balance >= amount, "Insufficient funds");
         payable(owner()).transfer(amount);
-    }
-
-    function setDescription(string memory _description) public onlyOwner {
-        description = _description;
-    }
-
-    function getDescription() public view returns (string memory) {
-        return description;
     }
 }
