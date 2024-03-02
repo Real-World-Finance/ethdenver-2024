@@ -32,6 +32,7 @@ contract TokenFactory is Ownable {
     }
 
     // BufficornCastle,BCC,500000,1000000000000000000,1709420650,15000000000000000000,10000000000000000000,20000000000000000000,15000000000000000000,https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg
+
     function createToken(
         string memory  name,
         string memory  symbol,
@@ -53,10 +54,9 @@ contract TokenFactory is Ownable {
             expectedROI,
             earlyWithdrawPenalty,
             pctCashReserve,
-            owner(),
+            address(this),
             profitPct,
-            imageUrl
-            
+            imageUrl            
         );
 
         tokens.push(token);
