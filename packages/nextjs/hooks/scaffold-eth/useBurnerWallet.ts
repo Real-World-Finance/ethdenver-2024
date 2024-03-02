@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import { Chain, Hex, HttpTransport, PrivateKeyAccount, createWalletClient, http } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-import { WalletClient, usePublicClient } from "wagmi";
+import { /*WalletClient,*/ usePublicClient } from "wagmi";
+import { WalletClient } from "viem";
 
 const burnerStorageKey = "scaffoldEth2.burnerWallet.sk";
 
@@ -57,7 +58,9 @@ type BurnerAccount = {
  * Creates a burner wallet
  */
 export const useBurnerWallet = (): BurnerAccount => {
-  const [burnerSk, setBurnerSk] = useLocalStorage<Hex>(burnerStorageKey, newDefaultPrivateKey);
+  const [burnerSk, setBurnerSk] = useLocalStorage<Hex>(burnerStorageKey, newDefaultPrivateKey/*FIXME:, {
+    initializeWithValue: false,
+  }*/);
 
   const publicClient = usePublicClient();
   const [walletClient, setWalletClient] = useState<WalletClient<HttpTransport, Chain, PrivateKeyAccount>>();
@@ -97,14 +100,14 @@ export const useBurnerWallet = (): BurnerAccount => {
       console.log("⚠ Could not create burner wallet");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [publicClient.chain.id]);
+  }, publicClient ? [publicClient.chain.id] : []);
 
   /**
    * Load wallet with burnerSk
    * connect and set wallet, once we have burnerSk and valid provider
    */
   useEffect(() => {
-    if (burnerSk && publicClient.chain.id) {
+    if (burnerSk && publicClient && publicClient.chain.id) {
       let wallet: WalletClient<HttpTransport, Chain, PrivateKeyAccount> | undefined = undefined;
       if (isValidSk(burnerSk)) {
         const randomAccount = privateKeyToAccount(burnerSk);
@@ -130,7 +133,7 @@ export const useBurnerWallet = (): BurnerAccount => {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [burnerSk, publicClient.chain.id]);
+  }, [burnerSk, publicClient ? publicClient.chain.id : undefined]);
 
   return {
     walletClient,
