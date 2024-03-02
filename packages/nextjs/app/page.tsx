@@ -1,60 +1,12 @@
-import React from 'react';
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import InvestmentCard, { Investment } from "../components/InvestmentCard";
 import type { NextPage } from "next";
 import { mock } from "wagmi/connectors";
 import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-
-const mockUrl = "https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg";
-const mockDescription =
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
-export const mockInvestment: Investment = {
-  name: "Fund 1",
-  description: mockDescription,
-  imageUrl: mockUrl,
-  price: 100,
-  id: "1",
-};
-const mockInvestments: Investment[] = [
-  mockInvestment,
-  {
-    name: "Fund 2",
-    description: mockDescription,
-    imageUrl: mockUrl,
-    price: 100,
-    id: "2",
-  },
-  {
-    name: "Fund 3",
-    description: mockDescription,
-    imageUrl: mockUrl,
-    price: 100,
-    id: "3",
-  },
-  {
-    name: "Fund 4",
-    description: mockDescription,
-    imageUrl: mockUrl,
-    price: 100,
-    id: "4",
-  },
-  {
-    name: "Fund 5",
-    description: mockDescription,
-    imageUrl: mockUrl,
-    price: 100,
-    id: "5",
-  },
-  {
-    name: "Fund 6",
-    description: mockDescription,
-    imageUrl: mockUrl,
-    price: 100,
-    id: "6",
-  },
-];
+import {mockInvestments} from "~~/services/mockInvestment";
+import InvestmentCard from "~~/components/InvestmentCard";
 
 const Home: NextPage = () => {
   return (

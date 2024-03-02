@@ -26,7 +26,6 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
     address[] private beneficiaries;
     string private imageURL;
     address private nftContractAddress;
-    string private imgURL;
 
     constructor(
         string  memory _name,
