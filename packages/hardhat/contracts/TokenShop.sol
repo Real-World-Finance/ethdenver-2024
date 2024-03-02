@@ -25,7 +25,8 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
     uint256 private minOwnedTokens = 20;
     address[] private beneficiaries;
     string private description;
-    address private nftContractAddress = 0xd2a5bC10698FD955D1Fe6cb468a17809A08fd005;
+    address private nftContractAddress;
+    string private imgURL;
 
     constructor(
         string  memory _name,
@@ -75,6 +76,22 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
     function getDueDate() public view returns (uint256) {
         return dueDate;
     }
+
+    function setNftContractAddress(address _address) public onlyOwner {
+        nftContractAddress = _address;
+    }
+
+    function getNftContractAddress() public view returns (address) {
+        return nftContractAddress;
+    }
+    
+    function setImgUrl(string memory _imgUrl) public onlyOwner {
+        imgURL = _imgUrl;
+    }
+
+    function getImgUrl() public view returns (string memory) {
+        return imgURL;
+    }    
 
     function ethExchangeValue() private pure returns (uint256) {
         //FIXME: should ask an oracle the current price in USD of one ETH:
