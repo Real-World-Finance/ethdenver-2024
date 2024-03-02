@@ -93,6 +93,10 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         return imageURL;
     }    
 
+    function getExpectedROI() public view returns (uint256) {
+        return expectedROI;
+    }    
+
     function ethExchangeValue() private pure returns (uint256) {
         //FIXME: should ask an oracle the current price in USD of one ETH:
         return 333531 * 10**16; //2024-02-29.
@@ -184,6 +188,7 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         return string.concat('{\n'
             '"price": ', Strings.toString(getPrice()), ',\n',
             '"dueDate": ', Strings.toString(getDueDate()), ',\n',
+            '"expectedROI": ', Strings.toString(getExpectedROI()), ',\n',
             '"nftContractAddress": "', Strings.toHexString(getNftContractAddress()), '",\n',
             '"imgUrl": "', getImgUrl(), '"\n',
         "}");
