@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 
 /* 
 Line to Deploy in Remix:
-BufficornCastle,BCC,500000,1000000000000000000,1709420650,15000000000000000000,10000000000000000000,20000000000000000000,https://remote-image.decentralized-content.com/image?url=https%3A%2F%2Fprod-metadata.s3.amazonaws.com%2Fimages%2F7553.png&w=1080&q=75,0x5B38Da6a701c568545dCfcB03FcB875f56beddC4,15000000000000000000
+BufficornCastle,BCC,500000,1000000000000000000,1709420650,15000000000000000000,10000000000000000000,20000000000000000000,0x5B38Da6a701c568545dCfcB03FcB875f56beddC4,15000000000000000000,description
 2024-03-02 16:04:10 -> This is the TimeStamp for the deploy test string
 */
 
@@ -21,10 +21,12 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
     uint256 private expectedROI; //in 10**18
     uint256 private earlyWithdrawPenalty; //in 10**18 USD
     uint256 private pctCashReserve; //in 10**18
-    string  private imageURL;
     uint256 private profitPct; //in 10**18
     uint256 private minOwnedTokens = 20;
     address[] private beneficiaries;
+    string private description;
+    address private nftContractAddress;
+    string private imgURL;
 
     constructor(
         string  memory _name,
@@ -35,9 +37,9 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         uint256 _expectedROI,
         uint256 _earlyWithdrawPenalty,
         uint256 _pctCashReserve,
-        string  memory _imageURL,
         address _trust,
-        uint256 _profitPct
+        uint256 _profitPct,
+        string memory _description
     )
         ERC20(_name, _symbol)
         ERC20Permit(_name)
@@ -50,8 +52,9 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         expectedROI = _expectedROI;
         earlyWithdrawPenalty = _earlyWithdrawPenalty;
         pctCashReserve = _pctCashReserve;
-        imageURL = _imageURL;
         profitPct = _profitPct;
+        description = _description;
+        
     } //end of constructor
 
     function decimals() public pure override returns (uint8) {
@@ -66,13 +69,29 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         return price;
     }
 
-    function setDueDate() public onlyOwner view returns (uint256) {
-        return dueDate;
+    function setDueDate(uint256 _dueDate) public onlyOwner {
+        dueDate = _dueDate;
     }
 
     function getDueDate() public view returns (uint256) {
         return dueDate;
     }
+
+    function setNftContractAddress(address _address) public onlyOwner {
+        nftContractAddress = _address;
+    }
+
+    function getNftContractAddress() public view returns (address) {
+        return nftContractAddress;
+    }
+    
+    function setImgUrl(string memory _imgUrl) public onlyOwner {
+        imgURL = _imgUrl;
+    }
+
+    function getImgUrl() public view returns (string memory) {
+        return imgURL;
+    }    
 
     function ethExchangeValue() private pure returns (uint256) {
         //FIXME: should ask an oracle the current price in USD of one ETH:
@@ -95,6 +114,12 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         uint256 excessAmount = msg.value - (tokenAmount * price * 10**18 / ethExchangeValue());
         if (excessAmount > 0) {
             payable(msg.sender).transfer(excessAmount);
+        }
+
+        // This is buyer's first token purchase. Let's give her an NFT.
+        if (balanceOf(msg.sender) == tokenAmount) {
+            (bool success, ) = nftContractAddress.call(abi.encodeWithSignature("safeMint(address)", msg.sender));
+            require(success, "NFT minting failed");
         }
     }
 
@@ -124,7 +149,6 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         _sell(payable(msg.sender), tokenAmount);
     }
 
-    // FIXME this function should require to be executed after due date
     function investmentExecution() public payable onlyOwner {
         uint256 netPaymentETH = totalSupply() * price * 10**18 / ethExchangeValue();
         uint256 totalPaymentETH = (100 * 10**18 - profitPct) * netPaymentETH / (100 * 10**18);
@@ -154,5 +178,13 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
     function withdraw(uint256 amount) public onlyOwner {
         require(address(this).balance >= amount, "Insufficient funds");
         payable(owner()).transfer(amount);
+    }
+
+    function setDescription(string memory _description) public onlyOwner {
+        description = _description;
+    }
+
+    function getDescription() public view returns (string memory) {
+        return description;
     }
 }
