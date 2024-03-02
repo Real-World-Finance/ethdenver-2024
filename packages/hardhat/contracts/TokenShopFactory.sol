@@ -31,6 +31,7 @@ contract TokenFactory is Ownable {
         
     }
 
+    // BufficornCastle,BCC,500000,1000000000000000000,1709420650,15000000000000000000,10000000000000000000,20000000000000000000,https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg,15000000000000000000
     function createToken(
         string memory  name,
         string memory  symbol,
