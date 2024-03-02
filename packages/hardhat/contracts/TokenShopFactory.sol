@@ -31,7 +31,7 @@ contract TokenFactory is Ownable {
         
     }
 
-    // BufficornCastle,BCC,500000,1000000000000000000,1709420650,15000000000000000000,10000000000000000000,20000000000000000000,https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg,15000000000000000000
+    // BufficornCastle,BCC,500000,1000000000000000000,1709420650,15000000000000000000,10000000000000000000,20000000000000000000,15000000000000000000,https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg
     function createToken(
         string memory  name,
         string memory  symbol,
@@ -41,8 +41,8 @@ contract TokenFactory is Ownable {
         uint256 expectedROI, //in 10**18
         uint256 earlyWithdrawPenalty, //in 10**18 USD
         uint256 pctCashReserve, //in 10**18
-        string memory  imageUrl,
-        uint256 profitPct //in 10**18
+        uint256 profitPct, //in 10**18
+        string memory  imageUrl
     ) public onlyOwner {
         RWF_Trust token = new RWF_Trust(
             name,
@@ -54,8 +54,9 @@ contract TokenFactory is Ownable {
             earlyWithdrawPenalty,
             pctCashReserve,
             owner(),
-            imageUrl,
-            profitPct
+            profitPct,
+            imageUrl
+            
         );
 
         tokens.push(token);
