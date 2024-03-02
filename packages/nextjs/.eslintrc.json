@@ -11,5 +11,8 @@
         "endOfLine": "auto"
       }
     ]
+  },
+  "globals":{
+    "BigInt": true
   }
 }

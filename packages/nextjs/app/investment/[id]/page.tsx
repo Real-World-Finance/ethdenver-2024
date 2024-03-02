@@ -3,13 +3,15 @@
 import React, { useCallback, useState } from "react";
 import { useParams } from "next/navigation";
 import { mainnet, sepolia } from "@wagmi/core/chains";
+import { write } from "fs";
 import type { NextPage } from "next";
-import { useAccount, useSwitchChain, useWalletClient } from "wagmi";
-import { mockInvestments } from "~~/services/mockInvestment";
+import { useAccount, useSwitchChain, useWalletClient, useWriteContract } from "wagmi";
 import EtherIcon from "~~/components/EtherIcon";
 // for development only
 import Banner from "~~/components/InvestmentDetailsBanner";
 import { RainbowKitCustomConnectButton } from "~~/components/scaffold-eth/RainbowKitCustomConnectButton";
+import TokenAbi from "~~/contracts/TokenShop";
+import { mockInvestments } from "~~/services/mockInvestment";
 
 const validAmountRegex = /^[0-9]{0,78}\.?[0-9]{0,18}$/;
 
@@ -32,7 +34,8 @@ const InvestmentDetails: NextPage = () => {
   // query for investment details
   const investment = mockInvestments[0];
 
-  const { isConnected, chain: currentChain } = useAccount();
+  const { data: hash, writeContract } = useWriteContract();
+  const { isConnected, chain: currentChain, address: connectedAddress } = useAccount();
   // console.log("account:", account);
   const walletClient = useWalletClient();
   // console.log("walletClient:", walletClient);
@@ -63,6 +66,27 @@ const InvestmentDetails: NextPage = () => {
     },
     [setAmount],
   );
+
+  const handleBuy = async () => {
+    // const txn = await writeContract({
+    //   address: connectedAddress as `0x${string}`,
+    //   abi:
+    // });
+    // console.log("txn:", txn);
+    console.log("handleBuy");
+  };
+
+  const handleSell = () => {
+    console.log("handleSell");
+  };
+
+  const handleClick = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      return activeTab === Tabs.Buy ? handleBuy() : handleSell();
+    },
+    [activeTab],
+  );
+
   return (
     <>
       <Banner investment={investment} />
@@ -127,7 +151,9 @@ const InvestmentDetails: NextPage = () => {
               </div>
 
               {isConnected && currentChain && currentChain.id === chain.id ? (
-                <button className="btn btn-primary">Buy Now</button>
+                <button className="btn btn-primary" onClick={handleClick}>
+                  {activeTab === Tabs.Buy ? "Buy Now" : "Redeem"}
+                </button>
               ) : isConnected && currentChain?.id !== chain.id ? (
                 <button className="btn btn-primary btn-error" onClick={() => switchChain({ chainId: chain.id })}>
                   Switch Network
