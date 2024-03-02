@@ -91,11 +91,19 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
 
     function getImgUrl() public view returns (string memory) {
         return imageURL;
-    }    
+    }
 
-    function getExpectedROI() public view returns (uint256) {
-        return expectedROI;
-    }    
+    function getEarlyWithdrawPenalty() public view returns (uint256) {
+        return earlyWithdrawPenalty;
+    }
+
+    function getMinOwnedTokens() public view returns (uint256) {
+        return minOwnedTokens;
+    }
+
+    function getAvailableTokens() public view returns (uint256) {
+        return maxTokens - totalSupply();
+    }
 
     function ethExchangeValue() private pure returns (uint256) {
         //FIXME: should ask an oracle the current price in USD of one ETH:
@@ -107,8 +115,7 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         require(tokenAmount > 0, "Insufficient ETH amount to buy a single token");
         require(tokenAmount + balanceOf(msg.sender) >= minOwnedTokens,
             "Insufficient ETH amount to buy the minimum amount of tokens");
-        uint256 remainingTokens = maxTokens - totalSupply();
-        require(tokenAmount <= remainingTokens, "Insufficient tokens available, send less ETH");
+        require(tokenAmount <= getAvailableTokens(), "Insufficient tokens available, send less ETH");
         require(block.timestamp < dueDate, "Fund has been terminated");
 
         _mint(msg.sender, tokenAmount);
@@ -130,6 +137,7 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
     function _sell(address payable seller, uint256 tokenAmount) private {
         require(tokenAmount > 0, "Invalid token amount");
         require(balanceOf(seller) >= tokenAmount, "Insufficient tokens in your balance");
+        //FIXME: add check for selling all tokens or at least minOwnedTokens.
 
         uint256 penalty = 0;
         if (block.timestamp < dueDate) {
@@ -188,7 +196,9 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
         return string.concat('{\n'
             '"price": ', Strings.toString(getPrice()), ',\n',
             '"dueDate": ', Strings.toString(getDueDate()), ',\n',
-            '"expectedROI": ', Strings.toString(getExpectedROI()), ',\n',
+            '"earlyWithdrawPenalty": ', Strings.toString(getEarlyWithdrawPenalty()), ',\n',
+            '"minOwnedTokens": ', Strings.toString(getMinOwnedTokens()), ',\n',
+            '"availableTokens": ', Strings.toString(getAvailableTokens()), ',\n',
             '"nftContractAddress": "', Strings.toHexString(getNftContractAddress()), '",\n',
             '"imgUrl": "', getImgUrl(), '"\n',
         "}");
