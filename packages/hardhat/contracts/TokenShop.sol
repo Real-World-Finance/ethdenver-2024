@@ -11,6 +11,7 @@ BufficornCastle,BCC,500000,1000000000000000000,1709420650,15000000000000000000,1
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract RWF_Trust is ERC20, ERC20Permit, Ownable {
 
@@ -177,5 +178,14 @@ contract RWF_Trust is ERC20, ERC20Permit, Ownable {
     function withdraw(uint256 amount) public onlyOwner {
         require(address(this).balance >= amount, "Insufficient funds");
         payable(owner()).transfer(amount);
+    }
+
+    function getMetadata() public view returns(string memory) {
+        return string.concat('{\n'
+            '"price": ', Strings.toString(getPrice()), ',\n',
+            '"dueDate": ', Strings.toString(getDueDate()), ',\n',
+            '"nftContractAddress": "', Strings.toHexString(getNftContractAddress()), '",\n',
+            '"imgUrl": "', getImgUrl(), '"\n',
+        "}");
     }
 }
