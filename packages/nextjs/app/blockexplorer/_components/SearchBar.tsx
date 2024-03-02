@@ -14,7 +14,7 @@ export const SearchBar = () => {
 
   const handleSearch = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (isHex(searchInput)) {
+    if (isHex(searchInput) && client) {
       try {
         const tx = await client.getTransaction({ hash: searchInput });
         if (tx) {
