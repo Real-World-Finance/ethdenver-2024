@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { mainnet, sepolia } from "@wagmi/core/chains";
 import type { NextPage } from "next";
 import { useAccount, useSwitchChain, useWalletClient } from "wagmi";
-import { mockInvestment } from "~~/app/page";
+import { mockInvestments } from "~~/services/mockInvestment";
 import EtherIcon from "~~/components/EtherIcon";
 // for development only
 import Banner from "~~/components/InvestmentDetailsBanner";
@@ -30,7 +30,7 @@ const InvestmentDetails: NextPage = () => {
   const [amount, setAmount] = useState("0");
 
   // query for investment details
-  const investment = mockInvestment;
+  const investment = mockInvestments[0];
 
   const { isConnected, chain: currentChain } = useAccount();
   // console.log("account:", account);
